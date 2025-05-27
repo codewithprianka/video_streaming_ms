@@ -1,0 +1,98 @@
+services:
+  auth-service:
+    build: ./auth-service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/video_streaming_ms
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - micro-net
+
+  content-service:
+    build: ./content-service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/video_streaming_ms
+    depends_on:
+      - mongo
+    volumes:
+      - ./storage/video:/app/storage/video
+      - ./storage/image:/app/storage/image
+      - ./content-service:/app # Live code updates
+    networks:
+      - micro-net
+  payment-service:
+    build: ./payment-service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/video_streaming_ms
+    depends_on:
+      - mongo
+    networks:
+      - micro-net
+
+  watch-history-service:
+    build: ./watch-history-service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/video_streaming_ms
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - micro-net
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - micro-net
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    depends_on:
+      - mongo
+    networks:
+      - micro-net
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - auth-service
+      - content-service
+    networks:
+      - micro-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # Management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - micro-net
+
+networks:
+  micro-net:
+
+volumes:
+  mongo-data:
