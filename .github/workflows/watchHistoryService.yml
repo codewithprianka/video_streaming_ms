@@ -1,0 +1,41 @@
+name: CI for Watch History Microservice
+
+on:
+  push:
+    paths:
+      - 'watch-history-service/**' 
+  pull_request:  
+    paths:
+        - 'watch-history-service/**'
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./watch-history-service
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: ✅ Run tests
+        run: npm test
+
+      - name: 🐳 Build Docker image
+        run: docker build -t auth-service .
+
+      # Optional: Push to DockerHub
+      # - name: 🔐 Login to DockerHub
+      #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # - name: ⬆️ Push Docker image
+      #   run: docker tag auth-service yourdockerhubusername/auth-service:latest && docker push yourdockerhubusername/auth-service:latest
