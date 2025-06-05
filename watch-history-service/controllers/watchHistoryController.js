@@ -36,7 +36,12 @@ const addWatchHistory = async (req, res) => {
     }
 }
 
+const test=()=>{
+    console.log("test");
+}
+
 module.exports = {
     getWatchHistory,
-    addWatchHistory
+    addWatchHistory,
+    test
 };
