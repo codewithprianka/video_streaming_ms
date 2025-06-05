@@ -23,6 +23,8 @@ router.post(
 
 router.get("/get",contentController.getContent);
 router.get("/get/:id",contentController.getContentById);
-router.get("/watch/video/:id",contentMiddleware,contentController.watchVideo);
+router.get("/watch/video/:id",contentMiddleware,contentController.watchVideo,contentController.videoStreaming);
+router.get("/watch/filter",contentMiddleware,contentController.filterVideoGenre);
+router.get("/watch/search",contentMiddleware,contentController.contentSearchByTitle);
 
 module.exports = router;

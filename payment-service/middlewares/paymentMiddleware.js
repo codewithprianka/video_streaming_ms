@@ -2,8 +2,13 @@ const jwt=require("jsonwebtoken");
 const axios=require("axios");
 
 const paymentMiddleware=async(req,res,next)=>{
-   
+    console.log("Payment middleware triggered");
+    console.log("Request headers:", req.cookies);
+    if (!req.headers['authorization'] && req.cookies.token) {
+        req.headers['authorization'] = `Bearer ${req.cookies.token}`;
+      }
     let token=req.headers["authorization"];
+    console.log("Token received:", token);
     if(token && token.startsWith("Bearer")){
         token=token.split(" ")[1];
     }

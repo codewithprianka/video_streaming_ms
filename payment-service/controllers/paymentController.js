@@ -4,7 +4,7 @@ const { publishUserSubscription } = require('../utils/rabbitmq');
 
 const createPayment = async (req, res) => {
   const { amount, currency = 'usd' } = req.body;
-
+console.log('Creating payment with amount:', amount,req.user._id);
   const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
   try {

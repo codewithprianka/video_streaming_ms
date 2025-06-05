@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
 };
 
 // Login user
-const loginUser=async(req,res)=>{
+const loginUser=async(req,res,next)=>{
     let {email,password}=req.body;
     email=email?.trim().toLowerCase();
     password=password?.trim();
@@ -79,6 +79,7 @@ const loginUser=async(req,res)=>{
         const isMatch=await user.comparePassword(password);
         if(!isMatch){
             return res.status(400).json({message:"Invalid credentials"});
+
         }
         const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:parseInt(process.env.JWT_EXPIRY)});
         
@@ -92,7 +93,7 @@ const loginUser=async(req,res)=>{
       });
         res.status(200).json({message:"User logged in successfully",token});
     } catch (error) {
-        res.status(500).json({message:error.message});
+      next(error);    
     }
 }
 
@@ -110,7 +111,6 @@ const getUserProfile=async(req,res)=>{
 }
 const validateUser=async(req,res)=>{
     try{
-        
         const user=await User.findById(req.query.did);
        
         if(!user){

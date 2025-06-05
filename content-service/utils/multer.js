@@ -1,6 +1,7 @@
 // Set storage engine
 const multer = require("multer");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
 // Set storage engine
 const storage = multer.diskStorage({
@@ -14,7 +15,8 @@ const storage = multer.diskStorage({
     }
   },
   filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
+    const extension = path.extname(file.originalname); // e.g., .jpg
+    const uniqueName = `${uuidv4()}${extension}`;
     cb(null, uniqueName);
   }
 });

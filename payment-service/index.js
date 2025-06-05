@@ -1,17 +1,24 @@
 const express= require('express');
 const app= express();
+const cors = require('cors');
 const dotenv=require('dotenv');
+const cookieParser=require("cookie-parser");
 const paymentRoutes=require('./routes/paymentRoute');
 const { connectRabbitMQ }=require('./utils/rabbitmq');
-const webhookRoute = require('./routes/stripeWebhook');
-
 
 dotenv.config({path:'./config.env'});
 
-
-app.use('/webhook', webhookRoute);
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use(cookieParser());
+
+app.use(
+    cors({
+      origin: "http://localhost:5173", // React app URL
+      credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+      allowedHeaders: "Content-Type",
+    })
+  );
 
 app.use('/api/payment', paymentRoutes);
 
