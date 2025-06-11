@@ -29,7 +29,7 @@ const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
 
   if (file.fieldname === "video" && videoTypes.test(ext)) {
-    cb(null, true);
+    cb(null, true);  //cb(error,result)
   } else if (file.fieldname === "image" && imageTypes.test(ext)) {
     cb(null, true);
   } else {

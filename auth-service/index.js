@@ -1,6 +1,7 @@
 const express=require("express");
 const app=express();
 const dotenv=require("dotenv");
+const rateLimit=require('express-rate-limit');
 const connectDB=require("./models/connection");
 const authRouter=require("./routes/auth_route")
 const cors = require("cors");
@@ -18,6 +19,14 @@ app.use(
     allowedHeaders: "Content-Type",
   })
 );
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+});
+
+app.use(limiter);
 
 app.use((err, req, res, next) => {
   console.error('Global Error Handler:', err);

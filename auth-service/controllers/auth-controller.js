@@ -122,9 +122,105 @@ const validateUser=async(req,res)=>{
     }
 }
 
+const forgetPasswordToken=async (req, res) => {
+    // This function is not implemented in the original code
+    let {email}=req.body;
+    email=email?.trim().toLowerCase();
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+    if (!validator.isEmail(email)) {  
+        return res.status(400).json({ message: "Invalid email format" });
+    }
+    
+    const response=await User.findOne({email});
+    console.log(response,"user");
+    if(!response){
+        return res.status(404).json({ message: "User not found" });
+    }
+    // Logic to send reset password email goes here
+    const resetToken = jwt.sign({ id: email }, process.env.JWT_RESET_SECRET, { expiresIn: '1h' });
+ if(!resetToken) {
+        return res.status(500).json({ message: "Error generating reset token" });
+    }
+    res.status(200).json({token:resetToken, message: "Redirect to token page." });
+}
+const forgetPasswordTokenverify = (req, res) => {
+    // This function is not implemented in the original code
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+    }
+    jwt.verify(token, process.env.JWT_RESET_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+        // Logic to reset password goes here
+        res.status(200).json({ token:token, message: "Token is valid. Proceed to reset password." });
+    });
+  }
+const forgetPasswordUpadate = async (req, res) => {
+    try {
+        const {  newPassword, confirmPassword } = req.body;
+        const decoded = jwt.verify(req.query.resetToken, process.env.JWT_RESET_SECRET); // or use req.user if using auth middleware
+
+        const user = await User.findOne({ email: decoded.id });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: "Passwords do not match" });
+        }
+      
+        user.password = newPassword;
+        user.cpassword = confirmPassword; // only if you're storing confirmPassword
+        await user.save();
+
+        return res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+
+const updatePassword = async (req, res) => {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+  
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+  
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+  
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const isMatch = await user.comparePassword(oldPassword);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Old password is incorrect" });
+      }
+      user.password = newPassword;
+      user.cpassword = confirmPassword;
+      await user.save();
+      res.status(200).json({ message: "Password updated successfully" });
+    }
+    catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports={
     registerUser,
     loginUser,
     getUserProfile,
-    validateUser
+    validateUser,
+    forgetPasswordToken,
+    forgetPasswordTokenverify,
+    forgetPasswordUpadate,
+    updatePassword
 }

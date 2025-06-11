@@ -12,7 +12,10 @@ Route.route('/login').post(loginUser);
 
 // Get user profile route
 Route.route('/profile').get(authMiddleware, getUserProfile);
-
+Route.post('/forgetPasswordToken', authController.forgetPasswordToken);
+Route.post('/forgetPasswordTokenverify', authController.forgetPasswordTokenverify);
+Route.post('/forgetPasswordUpadate', authController.forgetPasswordUpadate);
+Route.post('/updatePassword', authMiddleware, authController.updatePassword);
 // Middleware to protect routes
 
 // Export the router
