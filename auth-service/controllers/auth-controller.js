@@ -81,7 +81,7 @@ const loginUser=async(req,res,next)=>{
             return res.status(400).json({message:"Invalid credentials"});
 
         }
-        const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:parseInt(process.env.JWT_EXPIRY)});
+        const token=jwt.sign({id:user._id,role:user.role,email:user.email},process.env.JWT_SECRET,{expiresIn:parseInt(process.env.JWT_EXPIRY)});
         
         
     // Store token in HTTP-only cookie

@@ -15,6 +15,7 @@ const storage = multer.diskStorage({
     }
   },
   filename: function (req, file, cb) {
+    console.log("Uploading file:", file.originalname,req.body);
     const extension = path.extname(file.originalname); // e.g., .jpg
     const uniqueName = `${uuidv4()}${extension}`;
     cb(null, uniqueName);
@@ -23,12 +24,18 @@ const storage = multer.diskStorage({
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  const videoTypes = /mp4|mkv|mov|avi/;
+  const allowedVideoTypes = [
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',     // for .mov
+    'video/x-msvideo',     // for .avi
+    'video/x-matroska',    // for .mkv (if supported by your system)
+  ];
   const imageTypes = /jpg|jpeg|png|webp/;
 
   const ext = path.extname(file.originalname).toLowerCase();
 
-  if (file.fieldname === "video" && videoTypes.test(ext)) {
+  if (file.fieldname === 'video' && allowedVideoTypes.includes(file.mimetype)) {
     cb(null, true);  //cb(error,result)
   } else if (file.fieldname === "image" && imageTypes.test(ext)) {
     cb(null, true);

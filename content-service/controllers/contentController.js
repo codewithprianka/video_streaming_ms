@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const addContent = async (req, res) => {
+    console.log("Adding content with title:", req.body);
     try{
         const isAdmin=req.user.role==="admin";
         if(!isAdmin){

@@ -39,15 +39,50 @@ const successPayment = async (req, res) => {
   const { token } = req.query;
 
   try {
-    res.status(200).json({ message: 'Payment successful' });
-    publishUserSubscription(token);
+       const payload  = jwt.verify(token, process.env.JWT_SECRET);
+   
+    if(!payload || !payload.userId) {
+      return res.redirect('http://localhost:5173/subscription-error'); 
+    }
+      await publishUserSubscription(token);
+      res.redirect('http://localhost:5173'); // Redirect to success page
+    
   } catch (error) {
     console.error('Error updating subscription status:', error.message);
-    res.status(500).json({ message: 'Failed to update subscription status' });
-  }
+    return res.redirect('http://localhost:5173/subscription-error');  }
 }
+
+const paymentDetailsByEmail = async (req, res) => {
+  try {
+    console.log("Fetching payment details for email:", req.user.email);
+    const email = req.user.email;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    const customers = await stripe.customers.search({
+      query: `email:'${email}'`
+    });
+
+    if (!customers.data.length) {
+      throw new Error('No customer found with this email');
+    }
+
+    const customer = customers.data[0];
+
+    const payments = await stripe.paymentIntents.list({
+      customer: customer.id,
+      limit: 10
+    });
+
+    res.status(200).json(payments.data) ;
+  } catch (err) {
+    console.error('Error fetching payment history:', err.message);
+    res.status(500).json({ message: 'Failed to fetch payment history' });
+  }
+};
 
 module.exports = {
   createPayment,
-  successPayment
+  successPayment,
+  paymentDetailsByEmail
 };
