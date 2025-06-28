@@ -8,7 +8,7 @@ services:
       - rabbitmq
     networks:
       - micro-net
-
+      
   content-service:
     build: ./content-service
     environment:
