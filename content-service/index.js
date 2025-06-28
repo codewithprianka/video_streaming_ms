@@ -104,7 +104,7 @@ io.on("connection", (socket) => {
     console.log(`💬 Message from ${email} in room ${roomId}: ${message}`);
     io.to(roomId).emit("chat-message", {
       email,
-     text: message,
+      text: message,
       timestamp: Date.now()
     });
   });
